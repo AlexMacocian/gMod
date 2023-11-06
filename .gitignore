@@ -46,3 +46,5 @@ bin/
 *.opendb
 *.wixpdb
 
+/out
+/build
