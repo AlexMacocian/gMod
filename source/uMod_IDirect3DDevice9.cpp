@@ -1077,7 +1077,7 @@ HRESULT uMod_IDirect3DDevice9::EndScene(void)
     {
       if (OSD_Font==NULL) // create the font
       {
-        if (D3D_OK!=D3DXCreateFontA( m_pIDirect3DDevice9, 18, 5, FW_BOLD, 0, FALSE, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH | FF_DONTCARE, TEXT("Courier"), &OSD_Font))
+        if (D3D_OK!=D3DXCreateFontA( m_pIDirect3DDevice9, 18, 5, FW_BOLD, 0, FALSE, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH | FF_DONTCARE, "Courier", &OSD_Font))
           OSD_Font=NULL;
       }
 

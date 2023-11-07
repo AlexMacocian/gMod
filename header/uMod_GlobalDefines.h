@@ -16,10 +16,9 @@ You should have received a copy of the GNU General Public License
 along with Universal Modding Engine.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef uMod_GlobalDefines_H_
-#define uMod_GlobalDefines_H_
+#pragma once
 
-
+#include <Windows.h>
 #define BIG_BUFSIZE 1<<24
 #define SMALL_BUFSIZE 1<<10
 
@@ -192,6 +191,3 @@ typedef struct
 #define uMod_D3DFMT_MULTI2_ARGB8 1ull<<61
 #define uMod_D3DFMT_UYVY 1ull<<62
 #define uMod_D3DFMT_YUY2 1ull<<63
-    
-
-#endif

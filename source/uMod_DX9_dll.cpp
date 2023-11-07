@@ -84,13 +84,13 @@ void ExitDX9(void)
 
 void LoadOriginal_DX9_Dll(void)
 {
-  char buffer[MAX_PATH];
+  wchar_t buffer[MAX_PATH];
   if (gl_hOriginal_DX9_Dll==NULL)
   {
     GetSystemDirectory(buffer,MAX_PATH); //get the system directory, we need to open the original d3d9.dll
 
     // Append dll name
-    strcat_s( buffer, MAX_PATH,"\\d3d9.dll");
+    wcscat_s( buffer, MAX_PATH,L"\\d3d9.dll");
 
     // try to load the system's d3d9.dll
     gl_hOriginal_DX9_Dll = LoadLibrary(buffer);

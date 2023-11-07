@@ -20,8 +20,9 @@ along with Universal Modding Engine.  If not, see <http://www.gnu.org/licenses/>
 #ifndef uMod_TEXTURESERVER_H_
 #define uMod_TEXTURESERVER_H_
 
-#include "../header/uMod_GlobalDefines.h"
+#include "uMod_GlobalDefines.h"
 #include "uMod_ArrayHandler.h"
+#include <Windows.h>
 
 
 /**
@@ -65,20 +66,6 @@ public:
   int RemoveClient(uMod_TextureClient *client, const int version); // called from a Client
 
   /**
-   * Opens the pipe to the GUI (called from the dll entry routine)
-   * @param[in] name Name of the game
-   * @param[in] injection_method global hook=1, direct injection=2, no injection=3
-   * @return RETURN_OK on success
-   */
-  int OpenPipe(wchar_t *name, int injection_method); // called on initialization of our d3d9 fake dll
-
-  /**
-   * Close the Pipe to the GUI (called if dll entry is called to attach from the game)
-   * @return RETURN_OK on success
-   */
-  int ClosePipe(void); // called on exit of our d3d9 fake dll
-
-  /**
    * The mainloop reads from the pipe (blocking reading). It is running in a separate server thread.
    * @return RETURN_OK on success
    */
@@ -96,15 +83,6 @@ private:
    * @return RETURN_OK on success
    */
   int AddFile( char* buffer, DWORD64 size,  DWORD64 hash, bool force); // called from Mainloop(), if the content of the texture is sent
-
-  /**
-   * Add a file to the list of texture to be modded (called from the mainloop). Not supported anymore!
-   * @param[in] file_name Name and path to the file to be loaded.
-   * @param[in] hash hash of the texture to be replaced
-   * @param[in] force set to TRUE to force a reload of the texture
-   * @return RETURN_OK on success
-   */
-  int AddFile( wchar_t* file_name, DWORD64 hash, bool force); // called from Mainloop(), if the name and the path to the file is sent
 
   /**
    * Remove a texture (called from the mainloop).

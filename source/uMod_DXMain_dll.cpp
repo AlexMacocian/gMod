@@ -40,6 +40,8 @@ HINSTANCE             gl_hThisInstance = nullptr;
 uMod_TextureServer*    gl_TextureServer = nullptr;
 HANDLE                gl_ServerThread = nullptr;
 
+static FILE* stdout_proxy;
+static FILE* stderr_proxy;
 
 /*
  * global variable which are linked external
@@ -65,6 +67,12 @@ BOOL WINAPI DllMain( HINSTANCE hModule, DWORD  ul_reason_for_call, LPVOID lpRese
 	{
 	case DLL_PROCESS_ATTACH:
 	{
+#ifdef BUILD_TYPE_DEBUG
+        AllocConsole();
+        SetConsoleTitleA("Daybreak.GWCA Console");
+        freopen_s(&stdout_proxy, "CONOUT$", "w", stdout);
+        freopen_s(&stderr_proxy, "CONOUT$", "w", stderr);
+#endif
 	  InitInstance(hModule);
 		break;
 	}
@@ -104,12 +112,6 @@ void InitInstance(HINSTANCE hModule)
 
     InitDX9();
 
-    if (gl_TextureServer->OpenPipe(game, INJECTION_METHOD)) //open the pipe and send the name+path of this executable
-    {
-      Message("InitInstance: Pipe not opened\n");
-      return;
-    }
-
     gl_ServerThread = CreateThread( NULL, 0, ServerThread, NULL, 0, NULL); //creating a thread for the mainloop
     if (gl_ServerThread==NULL) {Message("InitInstance: Serverthread not started\n");}
 
@@ -118,10 +120,6 @@ void InitInstance(HINSTANCE hModule)
 
 void ExitInstance()
 {
-  if (gl_TextureServer!=NULL)
-  {
-    gl_TextureServer->ClosePipe(); //This must be done before the server thread is killed, because the server thread will endless wait on the ReadFile()
-  }
   if (gl_ServerThread!=NULL)
   {
     CloseHandle(gl_ServerThread); // kill the server thread
@@ -138,6 +136,14 @@ void ExitInstance()
 #endif
 #ifdef DEF_USE_DX10
   ExitDX10();
+#endif
+
+#ifdef BUILD_TYPE_DEBUG
+  if (stdout_proxy)
+      fclose(stdout_proxy);
+  if (stderr_proxy)
+      fclose(stderr_proxy);
+  FreeConsole();
 #endif
 
   CloseMessage();

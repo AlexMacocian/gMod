@@ -18,9 +18,7 @@ along with Universal Modding Engine.  If not, see <http://www.gnu.org/licenses/>
 
 
 
-#ifndef uMod_DXMAIN_DLL_H_
-#define uMod_DXMAIN_DLL_H_
-
+#pragma once
 #ifdef DEF_USE_DX9
 #include "../header/uMod_DX9_dll.h"
 #endif
@@ -99,7 +97,4 @@ void RemoveHook(void);
  * Dummy function need for the "Direct Injection" mehtod.
  */
 void Nothing(void);
-#endif
-
-
 #endif

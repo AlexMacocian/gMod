@@ -16,10 +16,7 @@ You should have received a copy of the GNU General Public License
 along with Universal Modding Engine.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-
-
-#ifndef uMod_DEFINES_H_
-#define uMod_DEFINES_H_
+#pragma once
 
 
 #ifdef LOG_MESSAGE
@@ -76,6 +73,3 @@ typedef LONG HRESULT;
 
 #define UNREFERENCED_PARAMETER(...)
 #endif
-
-
-#endif /* uMod_DEFINES_H_ */

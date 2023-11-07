@@ -16,12 +16,10 @@ You should have received a copy of the GNU General Public License
 along with Universal Modding Engine.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-
-
-#ifndef uMod_FIELDHANDLER_H_
-#define uMod_FIELDHANDLER_H_
+#pragma once
 
 #include "..\header\uMod_GlobalDefines.h"
+#include <Windows.h>
 
 /**
  * On entry hold the pointer to the fake texture data (file content)
@@ -183,10 +181,3 @@ int uMod_TextureHandler<T>::Remove(T* entry) //will be called, if a texture is c
   entry->Reference = -1;
   return (RETURN_OK);
 }
-
-
-
-
-
-
-#endif /* uMod_FIELDHANDLER_H_ */
