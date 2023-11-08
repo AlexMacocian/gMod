@@ -80,7 +80,7 @@ BOOL WINAPI DllMain(HINSTANCE hModule, DWORD  ul_reason_for_call, LPVOID lpReser
     {
 #ifdef BUILD_TYPE_DEBUG
         AllocConsole();
-        SetConsoleTitleA("Daybreak.GWCA Console");
+        SetConsoleTitleA("uMod Console");
         freopen_s(&stdout_proxy, "CONOUT$", "w", stdout);
         freopen_s(&stderr_proxy, "CONOUT$", "w", stderr);
 #endif

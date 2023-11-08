@@ -559,6 +559,45 @@ int uMod_TextureServer::UnlockMutex(void)
 
 int uMod_TextureServer::MainLoop(void) // run as a separated thread
 {
+    Message("MainLoop: searching for modlist.txt");
+    char gwpath[MAX_PATH];
+    GetModuleFileName(GetModuleHandle(NULL), gwpath, MAX_PATH); //ask for name and path of this executable
+    char* last_backslash = strrchr(gwpath, '\\');
+    if (last_backslash != NULL) {
+        // Terminate the string at the last backslash to remove the executable name
+        *last_backslash = '\0';
+    }
+
+    strcat(gwpath, "\\modlist.txt");
+    Message("MainLoop: searching in %s", gwpath);
+    // Attempt to open the file
+    FILE* file = fopen(gwpath, "r");
+    if (file) {
+        Message("MainLoop: found modlist.txt. Reading");
+        // Read each line from the file
+        char line[MAX_PATH];
+        while (fgets(line, sizeof(line), file) != NULL) {
+            Message("MainLoop: loading file %s", line);
+            auto file = new uMod_File(line);
+            auto result = file->GetContent();
+            if (file->Textures.size() > 0) {
+                if (!result) {
+                    Message("MainLoop: WARNING! GetContent returned failure, but some textures have been loaded for %s", line);
+                }
+
+                Message("MainLoop: Texture count %d %s", file->Textures.size(), line);
+                for (auto& texture : file->Textures) {
+                    AddFile(texture.data.data(), static_cast<DWORD64>(texture.data.size()), texture.hash, true);
+                }
+
+                PropagateUpdate(NULL);
+            }
+            else {
+                Message("MainLoop: Failed to load any textures for %s", line);
+            }
+        }
+    }
+
     Message("MainLoop: begin\n");
     http::server::Get("/id", [](const httplib::Request&, httplib::Response& response) {
         auto processId = GetCurrentProcessId();
@@ -573,15 +612,15 @@ int uMod_TextureServer::MainLoop(void) // run as a separated thread
         }
 
         const auto& fileName = file_it->second;
-        std::cout << fileName << " Loading file " << std::endl;
+        Message("MainLoop: Loading file %s", fileName.c_str());
         auto file = new uMod_File(fileName);
         auto result = file->GetContent();
         if (file->Textures.size() > 0) {
             if (!result) {
-                std::cout << fileName << " WARNING! GetContent returned failure, but some textures have been loaded" << std::endl;
+                Message("MainLoop: WARNING! GetContent returned failure, but some textures have been loaded", fileName.c_str());
             }
 
-            std::cout << fileName << " Texture count " << file->Textures.size() << std::endl;
+            Message("MainLoop: Texture count %d %s", file->Textures.size(), fileName.c_str());
             for (auto& texture : file->Textures) {
                 AddFile(texture.data.data(), static_cast<DWORD64>(texture.data.size()), texture.hash, true);
             }
@@ -589,7 +628,7 @@ int uMod_TextureServer::MainLoop(void) // run as a separated thread
             PropagateUpdate(NULL);
         }
         else {
-            std::cout << fileName << " Failed to load any textures" << std::endl;
+            Message("MainLoop: Failed to load any textures for %s", fileName.c_str());
             response.status = 400;
             response.set_content("Failed to load any textures", "text/plain");
         }
