@@ -21,8 +21,8 @@ configure_file("${CMAKE_CURRENT_SOURCE_DIR}/version.rc.in" "${VERSION_RC}" @ONLY
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(uMod "${CMAKE_CURRENT_LIST_DIR}/")
-set(DIRECTX_SDK_INCLUDE_DIR "C:/Program Files (x86)/Microsoft DirectX SDK (June 2010)/Include")
-set(DIRECTX_SDK_LIB_DIR "C:/Program Files (x86)/Microsoft DirectX SDK (June 2010)/Lib/x86")
+set(DIRECTX_SDK_INCLUDE_DIR "$ENV{DXSDK_DIR}/Include")
+set(DIRECTX_SDK_LIB_DIR "$ENV{DXSDK_DIR}/Lib/x86")
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake/")
 
 link_directories(${DIRECTX_SDK_LIB_DIR})
