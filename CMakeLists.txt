@@ -1,4 +1,4 @@
-﻿# CMakeList.txt : CMake project for Daybreak.GWCA, include source and define
+﻿# CMakeList.txt : CMake project for uMod, include source and define
 # project specific logic here.
 #
 
@@ -9,6 +9,14 @@ if(CMAKE_SIZEOF_VOID_P EQUAL 8)
 endif()
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+
+set(VERSION_MAJOR 1)
+set(VERSION_MINOR 5)
+set(VERSION_PATCH 0)
+set(VERSION_TWEAK 0)
+
+set(VERSION_RC "${CMAKE_CURRENT_BINARY_DIR}/version.rc")
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/version.rc.in" "${VERSION_RC}" @ONLY)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -23,7 +31,8 @@ add_library(uMod SHARED)
 file(GLOB SOURCES
     "source/pch.h"
     "source/*.cpp"
-    "header/*.h*")
+    "header/*.h*"
+    ${VERSION_RC})
 target_link_libraries(uMod PRIVATE ${DIRECTX_SDK_LIB_DIR}/d3d9.lib ${DIRECTX_SDK_LIB_DIR}/d3dx9.lib ${DIRECTX_SDK_LIB_DIR}/dxguid.lib)
 source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}" FILES ${SOURCES})
 target_sources(uMod PRIVATE ${SOURCES})
