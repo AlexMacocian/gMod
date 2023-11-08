@@ -16,34 +16,37 @@ You should have received a copy of the GNU General Public License
 along with Universal Modding Engine.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#pragma once
-#include "../header/uMod_Main.h"
 
-/**
- * Load the official d3d9.dll from the system path.
- */
-void LoadOriginal_DX9_Dll(void);
 
-/**
- * Initialize dx9 -> loads d3d9.dll and set detour if this dll is compiled for "Direct Injection" or "Hook Injection"
- */
-void InitDX9();
+#ifndef uMod_DX9_DLL_H_
+#define uMod_DX9_DLL_H_
 
-/**
- * Unload the d3d9.dll
- */
-void ExitDX9();
+void InitInstance(HINSTANCE hModule);
+void ExitInstance(void);
+void LoadOriginalDll(void);
+bool HookThisProgram( char *ret);
+DWORD WINAPI ServerThread( LPVOID lpParam);
 
-#if INJECTION_METHOD==DIRECT_INJECTION || INJECTION_METHOD==HOOK_INJECTION
 
-/**
- * Direct3DCreate9 function must be exported if compiled for "No Injection"
- */
+
+#ifndef NO_INJECTION
+
+void *DetourFunc(BYTE *src, const BYTE *dst, const int len);
+bool RetourFunc(BYTE *src, BYTE *restore, const int len);
 IDirect3D9 *APIENTRY uMod_Direct3DCreate9(UINT SDKVersion);
-
-/**
- * Direct3DCreate9Ex function must be exported if compiled for "No Injection"
- */
 HRESULT APIENTRY uMod_Direct3DCreate9Ex( UINT SDKVersion, IDirect3D9Ex **ppD3D);
+
+#ifdef HOOK_INJECTION
+LRESULT CALLBACK HookProc(int nCode, WPARAM wParam, LPARAM lParam);
+void InstallHook(void);
+void RemoveHook(void);
+#endif
+
+
+#ifdef DIRECT_INJECTION
+void Nothing(void);
+#endif
+
+#endif
 
 #endif

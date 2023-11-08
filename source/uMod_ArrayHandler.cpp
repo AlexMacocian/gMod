@@ -24,8 +24,6 @@ along with Universal Modding Engine.  If not, see <http://www.gnu.org/licenses/>
 
 
 
-/*
-
 
 uMod_FileHandler::uMod_FileHandler(void)
 {
@@ -105,4 +103,4 @@ int uMod_FileHandler::Remove(TextureFileStruct* file)
   }
   return (RETURN_OK);
 }
-*/
+

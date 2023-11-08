@@ -18,18 +18,19 @@ along with Universal Modding Engine.  If not, see <http://www.gnu.org/licenses/>
 
 
 
-#ifndef uMod_TEXTURECLIENT_HPP
-#define uMod_TEXTURECLIENT_HPP
+#ifndef uMod_TEXTUREHANDLER_HPP
+#define uMod_TEXTUREHANDLER_HPP
 
-#include <d3d9.h>
-#include "..\header\uMod_GlobalDefines.h"
+#include "..\header\uMod_IDirect3DTexture9.h"
+#include "..\header\uMod_IDirect3DDevice9.h"
 #include "..\header\uMod_Error.h"
+#include "..\header\uMod_ArrayHandler.h"
 
 
 class uMod_TextureServer;
 
-/**
- *  An object of this class is owned by each d3dXX device.
+/*
+ *  An object of this class is owned by each d3d9 device.
  *  functions called by the Server are called from the server thread instance.
  *  All other functions are called from the render thread instance of the game itself.
  */
@@ -37,196 +38,83 @@ class uMod_TextureServer;
 class uMod_TextureClient
 {
 public:
-  uMod_TextureClient(const int version);
-  virtual ~uMod_TextureClient(void);
+  uMod_TextureClient(uMod_TextureServer* server, IDirect3DDevice9* device);
+  ~uMod_TextureClient(void);
 
-  /**
-   * Connect to the server. (called from the instance, which creates the client, e.g. uMod_IDirect3DDevice9::uMod_IDirect3DDevice9)
-   * @return RETURN_OK on success
-   */
-  int ConnectToServer(uMod_TextureServer* server);
+  int AddTexture( uMod_IDirect3DTexture9* tex); //called from uMod_IDirect3DDevice9::CreateTexture(...) or uMod_IDirect3DDevice9::BeginScene()
+  int AddTexture( uMod_IDirect3DVolumeTexture9* tex); //called from uMod_IDirect3DVolumeTexture9::CreateTexture(...) or uMod_IDirect3DDevice9::BeginScene()
+  int AddTexture( uMod_IDirect3DCubeTexture9* tex); //called from uMod_IDirect3DCubeTexture9::CreateTexture(...) or uMod_IDirect3DDevice9::BeginScene()
 
-  /**
-   * Enable/Disable the "save all texture" mode. (called from the server)
-   * @param val
-   * @return RETURN_OK on success
-   */
-  virtual int SaveAllTextures(bool val) = 0;
+  int RemoveTexture( uMod_IDirect3DTexture9* tex); //called from  uMod_IDirect3DTexture9::Release()
+  int RemoveTexture( uMod_IDirect3DVolumeTexture9* tex); //called from  uMod_IDirect3DVolumeTexture9::Release()
+  int RemoveTexture( uMod_IDirect3DCubeTexture9* tex); //called from  uMod_IDirect3DCubeTexture9::Release()
 
-  /**
-   * Enable/Disable the "save all texture" mode. (called from the server)
-   * @param val
-   * @return RETURN_OK on success
-   */
-  virtual int SaveSingleTexture(bool val) = 0;
+  int SaveAllTextures(bool val); //called from the Server
+  int SaveSingleTexture(bool val); //called from the Server
 
-  /**
-   * Enable/Disable the string in the left upper corner during save single texture mode (called from the mainloop).
-   * @param[in] val
-   * @return
-   */
-  int ShowTextureString(bool val) {BoolShowTextureString = val; return (RETURN_OK);}
+  int SetSaveDirectory( wchar_t *dir); //called from the Server
+  int SetGameName( wchar_t *dir); //called from the Server
 
-  /**
-   * Enable/Disable the string in the left upper corner during save single texture mode (called from the mainloop).
-   * @param[in] val
-   * @return
-   */
-  int ShowSingleTexture(bool val) {BoolShowSingleTexture = val; return (RETURN_OK);}
-
-  /**
-   * Enable/Disable the hashing with CRC32, which is needed to support also tpf mods (called from the mainloop).
-   * @param[in] val
-   * @return
-   */
-  int SupportTPF(bool val) {BoolComputeCRC = val; return (RETURN_OK);}
-
-  /**
-   * Set the directory, wher the texture should be stored (called from the server)
-   * @param dir
-   * @return RETURN_OK on success
-   */
-  int SetSaveDirectory( wchar_t *dir);
-
-  /**
-   * Set the name of the game (default name of executabel without the extension .exe) (called from the server)
-   * @param name
-   * @return RETURN_OK on success
-   */
-  int SetGameName( wchar_t *name);
-
-  /**
-   * Set the key to got to the previous texture (called from the server)
-   * @param key
-   * @return RETURN_OK
-   */
-  int SetKeyBack( int key) {if (key>0) KeyBack = key; return (RETURN_OK);}
-  /**
-   * Set the key for saving the texture (called from the server)
-   * @param key
-   * @return RETURN_OK
-   */
-  int SetKeySave( int key) {if (key>0) KeySave = key; return (RETURN_OK);}
-  /**
-   * Set the key to go to the next texture (called from the server)
-   * @param key
-   * @return RETURN_OK
-   */
-  int SetKeyNext( int key) {if (key>0) KeyNext = key; return (RETURN_OK);}
-
-  /**
-   * Set the font color "during save single" texture mode.  (called from the server)
-   * @param colour
-   * @return
-   */
-  int SetFontColour( DWORD64 colour) {FontColour = (D3DCOLOR) colour; return (RETURN_OK);}
-
-  /**
-   * Set the texture color "during save single" texture mode. (called from the server)
-   * @param colour
-   * @return RETURN_OK
-   */
-  int SetTextureColour( DWORD64 colour) {TextureColour = (D3DCOLOR) colour; return (RETURN_OK);}
-
-  /**
-    * @param[in] format
-    * @return
-    */
-   int SetFileFormat(DWORD64 format) {FileFormat = format;  return (RETURN_OK);}
-
-   /**
-    * @param[in] format
-    * @return
-    */
-   int SetFormatFilter(DWORD64 format) {FormatFilter = format;  return (RETURN_OK);}
-
-   /**
-    * @param[in] size
-    * @return
-    */
-   int SetWidthFilter(DWORD64 size) {WidthFilter = size;  return (RETURN_OK);}
-
-   /**
-    * @param[in] size
-    * @return
-    */
-   int SetHeightFilter(DWORD64 size) {HeightFilter = size;  return (RETURN_OK);}
-
-   /**
-    * @param[in] size
-    * @return
-    */
-   int SetDepthFilter(DWORD64 size) {DepthFilter = size;  return (RETURN_OK);}
-
-  /**
-   * The server add an update to the client.(called from server)
-   * @param update Pointer to an array of TextureFileStruct, the client \b must delete this array!
-   * @param number number of entries
-   * @return RETURN_OK on success
-   */
-  int AddUpdate(TextureFileStruct* update, int number);
+  int SaveTexture(uMod_IDirect3DTexture9* pTexture); //called from uMod_IDirect3DDevice9::BeginScene() (save button) or from AddTexture(...) (SaveAllTextures)
+  int SaveTexture(uMod_IDirect3DVolumeTexture9* pTexture); //called from uMod_IDirect3DDevice9::BeginScene() (save button) or from AddTexture(...) (SaveAllTextures)
+  int SaveTexture(uMod_IDirect3DCubeTexture9* pTexture); //called from uMod_IDirect3DDevice9::BeginScene() (save button) or from AddTexture(...) (SaveAllTextures)
 
 
-  /**
-   * Merge the latest update (called from client -> e.g. uMod_IDirect3DDevice9::BeginScene())
-   * @return RETURN_OK on success
-   */
-  virtual int MergeUpdate(void) = 0;
+
+  int SetKeyBack( int key) {if (key>0) KeyBack = key; return (RETURN_OK);} //called from the Server
+  int SetKeySave( int key) {if (key>0) KeySave = key; return (RETURN_OK);} //called from the Server
+  int SetKeyNext( int key) {if (key>0) KeyNext = key; return (RETURN_OK);} //called from the Server
+
+  int SetFontColour( DWORD r, DWORD g, DWORD b) {FontColour = D3DCOLOR_ARGB(255, r,g,b); return (RETURN_OK);} //called from the Server
+  int SetTextureColour( DWORD r, DWORD g, DWORD b) {TextureColour = D3DCOLOR_ARGB(255, r,g,b); return (RETURN_OK);} //called from the Server
 
 
-  bool BoolSaveAllTextures; //!< true if all textures should be saved
-  bool BoolSaveSingleTexture; //!< true if "save single texture" mode is enabled
-  bool BoolShowTextureString; //!< true if a string should be displayed during "save single texture" mode is enabled
-  bool BoolShowSingleTexture; //!< true if the texture should be displayed during "save single texture" mode is enabled
-  bool BoolComputeCRC; //!< if true also the crc32 is calculated, which is need to support tpf
+  int AddUpdate(TextureFileStruct* update, int number);  //called from the Server, client object must delete update array
+  int MergeUpdate(void); //called from uMod_IDirect3DDevice9::BeginScene()
 
-  int KeyBack; //!< key value for going to the previous texture
-  int KeySave; //!< key value for saving the current texture
-  int KeyNext; //!< key value for going to the next texture
+  int LookUpToMod( uMod_IDirect3DTexture9* pTexture, int num_index_list=0, int *index_list=NULL); // called at the end AddTexture(...) and from Device->UpdateTexture(...)
+  int LookUpToMod( uMod_IDirect3DVolumeTexture9* pTexture, int num_index_list=0, int *index_list=NULL); // called at the end AddTexture(...) and from Device->UpdateTexture(...)
+  int LookUpToMod( uMod_IDirect3DCubeTexture9* pTexture, int num_index_list=0, int *index_list=NULL); // called at the end AddTexture(...) and from Device->UpdateTexture(...)
 
-  D3DCOLOR FontColour; //!< color of the message ("save single texture" mode)
-  D3DCOLOR TextureColour; //!< color of the texture ("save single texture" mode)
+  uMod_TextureHandler<uMod_IDirect3DTexture9> OriginalTextures; // stores the pointer to the uMod_IDirect3DTexture9 objects created by the game
+  uMod_TextureHandler<uMod_IDirect3DVolumeTexture9> OriginalVolumeTextures; // stores the pointer to the uMod_IDirect3DVolumeTexture9 objects created by the game
+  uMod_TextureHandler<uMod_IDirect3DCubeTexture9> OriginalCubeTextures; // stores the pointer to the uMod_IDirect3DCubeTexture9 objects created by the game
 
+  bool BoolSaveAllTextures;
+  bool BoolSaveSingleTexture;
+  int KeyBack;
+  int KeySave;
+  int KeyNext;
 
-  DWORD64 FileFormat; //!< file format to which the texture should be saved
-  DWORD64 FormatFilter; //!< texture format which should be saved (all==0, else bitwise 1=save,0=don't save)
-  DWORD64 WidthFilter; //!< filter min<<32 max, texture size must be min<=size<=max
-  DWORD64 HeightFilter; //!< filter min<<32 max, texture size must be min<=size<=max
-  DWORD64 DepthFilter; //!< filter min<<32 max, texture size must be min<=size<=max
+  D3DCOLOR FontColour;
+  D3DCOLOR TextureColour;
 
-  const int Version;
-  uMod_TextureServer* Server; //!< Pointer to the server
-  wchar_t SavePath[MAX_PATH]; //!< saving directory
-  wchar_t GameName[MAX_PATH]; //!< game name
+private:
+  uMod_TextureServer* Server;
+  IDirect3DDevice9* D3D9Device;
+  wchar_t SavePath[MAX_PATH];
+  wchar_t GameName[MAX_PATH];
 
-  TextureFileStruct* Update; //!< array which stores the file in memory and the hash of each texture to be modded
-  int NumberOfUpdate; //!< number of texture to be modded
+  TextureFileStruct* Update;
+  int NumberOfUpdate;
 
-  /**
-   * Lock the mutex. The mutex protect the AddUpdate and MergeUpdate function to be called simultaneously.
-   * @return RETURN_OK on success
-   */
   int LockMutex();
-  /**
-   * Unloock the mutex. The mutex protect the AddUpdate and MergeUpdate function to be called simultaneously.
-   * @return RETURN_OK on success
-   */
   int UnlockMutex();
-  HANDLE Mutex; //!< The mutex protect the AddUpdate and MergeUpdate function to be called simultaneously.
+  HANDLE Mutex;
 
-  int NumberToMod; //!< number of texture to be modded
-  TextureFileStruct* FileToMod; //!< array which stores the file in memory and the hash of each texture to be modded
-
-  /**
-   * Find the given hash value in the \a FileToMod list. A vector with index can be passed. If so, only these index are considered in the search
-   * @param hash hash value
-   * @param num_index_list number of index vector
-   * @param index_list pointer to the index vector
-   * @return index or a negative value if the hash value was not found
-   */
-  int GetIndex( DWORD64 hash, int num_index_list=0, int *index_list=(int*)0); // called from LookUpToMod(...);
+  int NumberToMod; // number of texture to be modded
+  TextureFileStruct* FileToMod; // array which stores the file in memory and the hash of each texture to be modded
 
 
+  int LookUpToMod( MyTypeHash hash, int num_index_list, int *index_list); // called from LookUpToMod(...);
+  int LoadTexture( TextureFileStruct* file_in_memory, uMod_IDirect3DTexture9 **ppTexture); // called if a target texture is found
+  int LoadTexture( TextureFileStruct* file_in_memory, uMod_IDirect3DVolumeTexture9 **ppTexture); // called if a target texture is found
+  int LoadTexture( TextureFileStruct* file_in_memory, uMod_IDirect3DCubeTexture9 **ppTexture); // called if a target texture is found
+
+  // and the corresponding fake texture should be loaded
+
+  //MyTypeHash GetHash(unsigned char *str, int len);
+  //unsigned int GetCRC32(char *pcDatabuf, unsigned int ulDatalen);
 };
 
 

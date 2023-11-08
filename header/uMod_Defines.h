@@ -16,40 +16,35 @@ You should have received a copy of the GNU General Public License
 along with Universal Modding Engine.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#pragma once
 
+
+#ifndef uMod_DEFINES_H_
+#define uMod_DEFINES_H_
+
+#include <iostream>
 
 #ifdef LOG_MESSAGE
 extern FILE *gl_File;
 
-#define Message(...) {if (gl_File!=NULL) {fprintf( gl_File, __VA_ARGS__); fflush(gl_File);}}
-#if INJECTION_METHOD == HOOK_INJECTION
-#define OpenMessage(...) {if (fopen_s( &gl_File, "uMod_log.txt", "wt")) gl_File=NULL; else fprintf( gl_File, "HI " uMod_VERSION_char ": 0000001\n");}
+#define Message(...) { printf(__VA_ARGS__); }
+#ifdef HOOK_INJECTION
+#define OpenMessage(...) {if (fopen_s( &gl_File, "uMod_log.txt", "wt")) gl_File=NULL; else fprintf( gl_File, "HI R40: 0000000\n");}
 #endif
 
-#if INJECTION_METHOD == DIRECT_INJECTION
-#define OpenMessage(...) {if (fopen_s( &gl_File, "uMod_log.txt", "wt")) gl_File=NULL; else fprintf( gl_File, "DI " uMod_VERSION_char ": 0000001\n");}
+#ifdef DIRECT_INJECTION
+#define OpenMessage(...)
 #endif
 
-#if INJECTION_METHOD == NO_INJECTION
-#define OpenMessage(...) {if (fopen_s( &gl_File, "uMod_log.txt", "wt")) gl_File=NULL; else fprintf( gl_File, "NI " uMod_VERSION_char ": 0000001\n");}
+#ifdef NO_INJECTION
+#define OpenMessage(...) {if (fopen_s( &gl_File, "uMod_log.txt", "wt")) gl_File=NULL; else fprintf( gl_File, "NI R40: 0000000\n");}
 #endif
 
-#define CloseMessage(...) {if (gl_File!=NULL) fclose(gl_File);}
+#define CloseMessage(...)
 
 
 #else
-/**
- * Open the file for logging (if LOG_MESSAGE=1 was passed during compilation)
- */
 #define OpenMessage(...)
-/**
- * Print a message (like printf) into the file ant flush the content to disk (if LOG_MESSAGE=1 was passed during compilation)
- */
 #define Message(...)
-/**
- * Close the file for logging (if LOG_MESSAGE=1 was passed during compilation)
- */
 #define CloseMessage(...)
 #endif
 
@@ -61,15 +56,15 @@ typedef unsigned long DWORD32;
 #define STDMETHOD(method)     virtual HRESULT method
 #define STDMETHOD_(ret, method)  virtual ret method
 #define sprintf_s(...)
-#define swprintf_s(...)
-#define strcat_s(...)
 #define fprintf(...)
 #define fclose(...)
 #define fseek(...)
 #define ftell(...) 0
 #define fflush(...)
-#define qsort(...)
 typedef LONG HRESULT;
 
 #define UNREFERENCED_PARAMETER(...)
 #endif
+
+
+#endif /* uMod_DEFINES_H_ */

@@ -36,42 +36,31 @@ along with Universal Modding Engine.  If not, see <http://www.gnu.org/licenses/>
 
 #include <d3d9.h>
 #include <d3dx9.h>
-//#include "detours.h"
+
+
 
 
 #include "../header/uMod_GlobalDefines.h"
 #include "../header/uMod_Error.h"
-#include "../header/uMod_Utils.h"
-
 #include "uMod_Defines.h"
-
+#include "uMod_DX9_dll.h"
 #include "uMod_TextureFunction.h"
 
-#include "uMod_DXMain_dll.h"
+#include "uMod_IDirect3D9.h"
+#include "uMod_IDirect3D9Ex.h"
 
+#include "uMod_IDirect3DDevice9.h"
+#include "uMod_IDirect3DDevice9Ex.h"
+
+#include "uMod_IDirect3DCubeTexture9.h"
+#include "uMod_IDirect3DTexture9.h"
+#include "uMod_IDirect3DVolumeTexture9.h"
 
 #include "uMod_ArrayHandler.h"
 #include "uMod_TextureServer.h"
 #include "uMod_TextureClient.h"
 
-/**
- * global variable: HINSTANCE
- */
-extern HINSTANCE             gl_hThisInstance;
 
-/**
- * gloabal variable: pointer to TextureServer
- */
-extern uMod_TextureServer*    gl_TextureServer;
-
-/**
- * gloabal variable: pointer to the server thread
- */
-extern HANDLE                gl_ServerThread;
-
-/**
- * gloabal variable: error state. This is not supported at the moment.
- */
 extern unsigned int gl_ErrorState;
 
 #endif

@@ -30,8 +30,8 @@ along with Universal Modding Engine.  If not, see <http://www.gnu.org/licenses/>
 
 #include <d3d9.h>
 #include <d3dx9.h>
-#include "..\header\uMod_TextureServer.h"
-
+#include "uMod_TextureServer.h"
+#include "uMod_TextureClient.h"
 
 class uMod_IDirect3D9Ex : public IDirect3D9Ex
 {

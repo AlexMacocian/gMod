@@ -28,13 +28,12 @@ along with Universal Modding Engine.  If not, see <http://www.gnu.org/licenses/>
 #ifndef uMod_IDirect3DDevice9_H_
 #define uMod_IDirect3DDevice9_H_
 
-#include "..\header\uMod_Main.h"
-#include "uMod_TextureClient_DX9.h"
+#include <d3d9.h>
+#include <d3dx9.h>
 #include "uMod_IDirect3DTexture9.h"
 #include "uMod_IDirect3DVolumeTexture9.h"
 #include "uMod_IDirect3DCubeTexture9.h"
 
-class uMod_TextureClient_DX9;
 
 class uMod_IDirect3DDevice9 : public IDirect3DDevice9
 {
@@ -166,7 +165,7 @@ public:
 
 
 
-  uMod_TextureClient_DX9* GetuMod_Client(void) {return (uMod_Client);}
+  uMod_TextureClient* GetuMod_Client(void) {return (uMod_Client);}
 
   uMod_IDirect3DTexture9* GetLastCreatedTexture(void) {return (LastCreatedTexture);}
   int SetLastCreatedTexture(uMod_IDirect3DTexture9* pTexture) {LastCreatedTexture=pTexture; return (RETURN_OK);}
@@ -182,9 +181,6 @@ public:
   uMod_IDirect3DVolumeTexture9* GetSingleVolumeTexture(void) {return (SingleVolumeTexture);}
   uMod_IDirect3DCubeTexture9* GetSingleCubeTexture(void) {return (SingleCubeTexture);}
 
-  int ComputetHash( DWORD64 &CRC64, DWORD32 &CRC32, IDirect3DSurface9 *surface, bool compute_crc);
-
-  void SetNextTextureIsFake(void) {NextTextureIsFake=true;}
 
  private:
 	int CreateSingleTexture(void);
@@ -198,20 +194,18 @@ public:
 
   D3DCOLOR TextureColour;
   ID3DXFont *OSD_Font;
-  ID3DXSprite *pSprite;
-
+  //D3DCOLOR FontColour;
   int BackBufferCount;
   bool NormalRendering;
 
   int uMod_Reference;
 
-  bool NextTextureIsFake;
   uMod_IDirect3DTexture9* LastCreatedTexture;
   uMod_IDirect3DVolumeTexture9* LastCreatedVolumeTexture;
   uMod_IDirect3DCubeTexture9* LastCreatedCubeTexture;
 
   uMod_TextureServer* uMod_Server;
-  uMod_TextureClient_DX9* uMod_Client;
+  uMod_TextureClient* uMod_Client;
 };
 
 #endif

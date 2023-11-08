@@ -32,9 +32,10 @@ target_compile_definitions(uMod PRIVATE
     $<$<CONFIG:Debug>:BUILD_TYPE_DEBUG>
     $<$<CONFIG:Release>:BUILD_TYPE_RELEASE>
     INJECTION_METHOD=2
+    DIRECT_INJECTION
     DEF_USE_DX9=true
-    _UNICODE=true
-    UNICODE=true
+    DX_XX_File=9
+    LOG_MESSAGE
 )
 
 target_precompile_headers(uMod PRIVATE "header/pch.h")

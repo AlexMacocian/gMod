@@ -22,11 +22,7 @@ along with Universal Modding Engine.  If not, see <http://www.gnu.org/licenses/>
  */
 
 
-#include "../header/uMod_Main.h"
-#include "../header/uMod_TextureFunction.h"
-#include "uMod_IDirect3DDevice9.h"
-#include "uMod_IDirect3DTexture9.h"
-#include "uMod_IDirect3DSurface9.h"
+#include "uMod_Main.h"
 
 //this function yields for the non switched texture object
 HRESULT APIENTRY uMod_IDirect3DTexture9::QueryInterface(REFIID riid, void** ppvObj)
@@ -213,23 +209,10 @@ HRESULT APIENTRY uMod_IDirect3DTexture9::GetLevelDesc(UINT Level,D3DSURFACE_DESC
 }
 
 //this function yields for the non switched texture object
-HRESULT APIENTRY uMod_IDirect3DTexture9::GetSurfaceLevel(UINT Level, IDirect3DSurface9** ppSurfaceLevel)
+HRESULT APIENTRY uMod_IDirect3DTexture9::GetSurfaceLevel(UINT Level,IDirect3DSurface9** ppSurfaceLevel)
 {
-  Message( "uMod_IDirect3DTexture9::GetSurfaceLevel( %u, %p): %p\n", Level, *ppSurfaceLevel, this);
-  IDirect3DSurface9* pSurf;
-  uMod_IDirect3DSurface9* puMod_Surf;
-  HRESULT ret;
-  if (CrossRef_D3Dtex!=NULL) ret = (CrossRef_D3Dtex->m_D3Dtex->GetSurfaceLevel(Level, &pSurf));
-  else ret = (m_D3Dtex->GetSurfaceLevel(Level, &pSurf));
-
-  if (SUCCEEDED(ret))
-  {
-    puMod_Surf = new uMod_IDirect3DSurface9( pSurf, this, NULL, m_D3Ddev);
-    *ppSurfaceLevel = puMod_Surf;
-  }
-  else *ppSurfaceLevel = pSurf;
-
-  return ret;
+  if (CrossRef_D3Dtex!=NULL) return (CrossRef_D3Dtex->m_D3Dtex->GetSurfaceLevel(Level, ppSurfaceLevel));
+	return (m_D3Dtex->GetSurfaceLevel(Level, ppSurfaceLevel));
 }
 
 //this function yields for the non switched texture object
@@ -242,25 +225,8 @@ HRESULT APIENTRY uMod_IDirect3DTexture9::LockRect(UINT Level,D3DLOCKED_RECT* pLo
 //this function yields for the non switched texture object
 HRESULT APIENTRY uMod_IDirect3DTexture9::UnlockRect(UINT Level)
 {
-  HRESULT ret;
-  if (CrossRef_D3Dtex!=NULL) ret = (CrossRef_D3Dtex->m_D3Dtex->UnlockRect(Level));
-  ret = (m_D3Dtex->UnlockRect(Level));
-
-  DWORD64 crc64 = CRC64;
-  DWORD64 crc32 = CRC32;
-  ComputetHash(crc32>0);
-  if (crc64!=CRC64)
-  {
-    // device can be uMod_IDirect3DDevice9 object or a uMod_IDirect3DDevice9Ex object !
-    void *cpy;
-    long ret = m_D3Ddev->QueryInterface( IID_IDirect3DTexture9, &cpy);
-    if (ret == 0x01000000L)
-      ((uMod_IDirect3DDevice9*) m_D3Ddev)->GetuMod_Client()->CRCHasChanged(this);
-    else
-      ((uMod_IDirect3DDevice9Ex*) m_D3Ddev)->GetuMod_Client()->CRCHasChanged(this);
-  }
-
-  return ret;
+  if (CrossRef_D3Dtex!=NULL) return (CrossRef_D3Dtex->m_D3Dtex->UnlockRect(Level));
+	return (m_D3Dtex->UnlockRect(Level));
 }
 
 //this function yields for the non switched texture object
@@ -271,24 +237,117 @@ HRESULT APIENTRY uMod_IDirect3DTexture9::AddDirtyRect(CONST RECT* pDirtyRect)
 }
 
 
-int uMod_IDirect3DTexture9::ComputetHash( bool compute_crc)
+int uMod_IDirect3DTexture9::GetHash(MyTypeHash &hash)
 {
+  hash=0u;
   if (FAKE) return (RETURN_BAD_ARGUMENT);
   IDirect3DTexture9 *pTexture = m_D3Dtex;
   if (CrossRef_D3Dtex!=NULL) pTexture = CrossRef_D3Dtex->m_D3Dtex;
 
+  IDirect3DSurface9 *pOffscreenSurface = NULL;
+  //IDirect3DTexture9 *pOffscreenTexture = NULL;
+  IDirect3DSurface9 *pResolvedSurface = NULL;
+  D3DLOCKED_RECT d3dlr;
+  D3DSURFACE_DESC desc;
 
-  IDirect3DSurface9 *surface = NULL;
-  if (pTexture->GetSurfaceLevel(0, &surface)!=D3D_OK)
+  if (pTexture->GetLevelDesc(0, &desc)!=D3D_OK) //get the format and the size of the texture
   {
-    Message("uMod_IDirect3DTexture9::GetHash() Failed: GetSurfaceLevel\n");
-    return (RETURN_LockRect_FAILED);
+    Message("uMod_IDirect3DTexture9::GetHash() Failed: GetLevelDesc \n");
+    return (RETURN_GetLevelDesc_FAILED);
   }
 
-  if (compute_crc) InitCRC32(CRC32);
-  InitCRC64(CRC64);
-  ((uMod_IDirect3DDevice9*)(m_D3Ddev))->ComputetHash( CRC64, CRC32, surface, compute_crc);
+  Message("uMod_IDirect3DTexture9::GetHash() (%d %d) %d\n", desc.Width, desc.Height, desc.Format);
 
-  surface->Release();
+
+  if (desc.Pool==D3DPOOL_DEFAULT) //get the raw data of the texture
+  {
+    //Message("uMod_IDirect3DTexture9::GetHash() (D3DPOOL_DEFAULT)\n");
+
+    IDirect3DSurface9 *pSurfaceLevel_orig = NULL;
+    if (pTexture->GetSurfaceLevel( 0, &pSurfaceLevel_orig)!=D3D_OK)
+    {
+      Message("uMod_IDirect3DTexture9::GetHash() Failed: GetSurfaceLevel 1  (D3DPOOL_DEFAULT)\n");
+      return (RETURN_LockRect_FAILED);
+    }
+
+    if (desc.MultiSampleType != D3DMULTISAMPLE_NONE)
+    {
+      //Message("uMod_IDirect3DTexture9::GetHash() MultiSampleType\n");
+      if (D3D_OK!=m_D3Ddev->CreateRenderTarget( desc.Width, desc.Height, desc.Format, D3DMULTISAMPLE_NONE, 0, FALSE, &pResolvedSurface, NULL ))
+      {
+        pSurfaceLevel_orig->Release();
+        Message("uMod_IDirect3DTexture9::GetHash() Failed: CreateRenderTarget  (D3DPOOL_DEFAULT)\n");
+        return (RETURN_LockRect_FAILED);
+      }
+      if (D3D_OK!=m_D3Ddev->StretchRect( pSurfaceLevel_orig, NULL, pResolvedSurface, NULL, D3DTEXF_NONE ))
+      {
+        pSurfaceLevel_orig->Release();
+        Message("uMod_IDirect3DTexture9::GetHash() Failed: StretchRect  (D3DPOOL_DEFAULT)\n");
+        return (RETURN_LockRect_FAILED);
+      }
+
+      pSurfaceLevel_orig = pResolvedSurface;
+    }
+
+    if (D3D_OK!=m_D3Ddev->CreateOffscreenPlainSurface( desc.Width, desc.Height, desc.Format, D3DPOOL_SYSTEMMEM, &pOffscreenSurface, NULL))
+    {
+      pSurfaceLevel_orig->Release();
+      if (pResolvedSurface!=NULL) pResolvedSurface->Release();
+      Message("uMod_IDirect3DTexture9::GetHash() Failed: CreateOffscreenPlainSurface (D3DPOOL_DEFAULT)\n");
+      return (RETURN_TEXTURE_NOT_LOADED);
+    }
+
+    if (D3D_OK!=m_D3Ddev->GetRenderTargetData( pSurfaceLevel_orig, pOffscreenSurface))
+    {
+      pSurfaceLevel_orig->Release();
+      if (pResolvedSurface!=NULL) pResolvedSurface->Release();
+      pOffscreenSurface->Release();
+      Message("uMod_IDirect3DTexture9::GetHash() Failed: GetRenderTargetData (D3DPOOL_DEFAULT)\n");
+      return (RETURN_LockRect_FAILED);
+    }
+    pSurfaceLevel_orig->Release();
+
+    if (pOffscreenSurface->LockRect( &d3dlr, NULL, D3DLOCK_READONLY)!=D3D_OK)
+    {
+      if (pResolvedSurface!=NULL) pResolvedSurface->Release();
+      pOffscreenSurface->Release();
+      Message("uMod_IDirect3DTexture9::GetHash() Failed: LockRect (D3DPOOL_DEFAULT)\n");
+      return (RETURN_LockRect_FAILED);
+    }
+  }
+  else if (pTexture->LockRect( 0, &d3dlr, NULL, D3DLOCK_READONLY)!=D3D_OK)
+  {
+    Message("uMod_IDirect3DTexture9::GetHash() Failed: LockRect 1\n");
+    if (pTexture->GetSurfaceLevel(0, &pResolvedSurface)!=D3D_OK)
+    {
+      Message("uMod_IDirect3DTexture9::GetHash() Failed: GetSurfaceLevel\n");
+      return (RETURN_LockRect_FAILED);
+    }
+    if (pResolvedSurface->LockRect( &d3dlr, NULL, D3DLOCK_READONLY)!=D3D_OK)
+    {
+      pResolvedSurface->Release();
+      Message("uMod_IDirect3DTexture9::GetHash() Failed: LockRect 2\n");
+      return (RETURN_LockRect_FAILED);
+    }
+  }
+
+  int size = (GetBitsFromFormat( desc.Format) * desc.Width*desc.Height)/8;
+
+  hash = GetCRC32( (char*) d3dlr.pBits, size); //calculate the crc32 of the texture
+
+  if (pOffscreenSurface!=NULL)
+  {
+    pOffscreenSurface->UnlockRect();
+    pOffscreenSurface->Release();
+    if (pResolvedSurface!=NULL) pResolvedSurface->Release();
+  }
+  else if (pResolvedSurface!=NULL)
+  {
+    pResolvedSurface->UnlockRect();
+    pResolvedSurface->Release();
+  }
+  else pTexture->UnlockRect(0);
+
+  Message("uMod_IDirect3DTexture9::GetHash() %#lX (%d %d) %d = %d\n", hash, desc.Width, desc.Height, desc.Format, size);
   return (RETURN_OK);
 }

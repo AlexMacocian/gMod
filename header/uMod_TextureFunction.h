@@ -19,50 +19,11 @@ along with Universal Modding Engine.  If not, see <http://www.gnu.org/licenses/>
 #define uMod_TEXTUREFUNCTION_H_
 
 
-
-inline void InitCRC64(DWORD64 &crc)
-{
-  crc = 0xFFFFFFFFFFFFFFFFULL;
-}
-
-extern const DWORD64 crctab64[256];
-/**
- * CRC64 function
- *
- * @param[in] data pointer to the buffer
- * @param[in] len length of buffer in bytes
- * @param[in,out] hash in = initial value of the hash; out = returned hash
- */
-inline void GetCRC64(DWORD64 &crc, const unsigned char *cp, unsigned long length)
-{
-  while (length--)
-    crc = crctab64[(crc ^ *(cp++)) & 0xff] ^ (crc >> 8);
-}
-
-
-
-inline void InitCRC32(DWORD32 &crc)
-{
-  crc = 0xffffffff;
-}
-
-/**
- * Caluclate the CRC32 value over a buffer. This function is used in texmod. Thanks to RS for given me this information!
- * @param[in] data pointer to the buffer
- * @param[in] len length of buffer in bytes
- * @return CRC32 value
- */
-void GetCRC32( DWORD32 &crc, unsigned char *data, unsigned int len);
+unsigned int GetCRC32( char *pcDatabuf, unsigned int ulDatalen);
 /*
     case D3DFMT_MULTI2_ARGB8:
     case D3DFMT_VERTEXDATA:
     */
-
-/**
- * Returns the number of bits used per pixel.
- * @param[in] format DX format.
- * @return
- */
 inline int GetBitsFromFormat(D3DFORMAT format)
 {
   switch(format) //switch trough the formats to calculate the size of the raw data

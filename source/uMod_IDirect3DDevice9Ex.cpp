@@ -18,9 +18,7 @@ along with Universal Modding Engine.  If not, see <http://www.gnu.org/licenses/>
 
 
 
-#include "../header/uMod_Main.h"
-#include "uMod_IDirect3DDevice9Ex.h"
-#include "uMod_IDirect3DSurface9.h"
+#include "uMod_Main.h"
 
 #define uMod_IDirect3DDevice9 uMod_IDirect3DDevice9Ex
 #define IDirect3DDevice9 IDirect3DDevice9Ex
@@ -28,9 +26,7 @@ along with Universal Modding Engine.  If not, see <http://www.gnu.org/licenses/>
 
 #define RETURN_QueryInterface 0x01000001L
 #define PRE_MESSAGE "uMod_IDirect3DDevice9Ex"
-#define DEF_DX_VERSION VERSION_DX9EX
 
-#define uMod_IDirect3DDevice9_H_
 
 #include "uMod_IDirect3DDevice9.cpp"
 
