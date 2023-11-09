@@ -101,4 +101,8 @@ jobs:
             echo "Version=$fileVersionInfo" >> $GITHUB_ENV
         }
       shell: pwsh
+
+    - name: Retrieve version
+      run: echo ${{ env.Version }}
+      shell: pwsh
     
