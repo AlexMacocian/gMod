@@ -6,6 +6,9 @@ on:
   push:
     branches:
       - main
+  pull_request:
+    branches:
+      - main
   workflow_dispatch:
       
 jobs:
@@ -66,30 +69,12 @@ jobs:
       uses: microsoft/setup-msbuild@v1.3.1
 
     - name: Build CMake Files
-      run: cmake -S . -B build -A Win32
+      run: cmake -S . -B build -A Win32 -DDIRECTX_SDK_INCLUDE_DIR="${{ env.DXSDK_DIR }}/Include" -DDIRECTX_SDK_LIB_DIR="${{ env.DXSDK_DIR }}/Lib/x86"
       env:
         DXSDK_DIR: ${{ env.DXSDK_DIR }}
 
     - name: Build binaries
-      run: cmake --build build --config Release
+      run: cmake --build build --config Release -DDIRECTX_SDK_INCLUDE_DIR="${{ env.DXSDK_DIR }}/Include" -DDIRECTX_SDK_LIB_DIR="${{ env.DXSDK_DIR }}/Lib/x86"
       env:
         DXSDK_DIR: ${{ env.DXSDK_DIR }}
-
-    - name: Retrieve version
-      run: |
-        $fileVersionInfo = (Get-ItemProperty -Path .\build\Release\uMod.dll).VersionInfo.FileVersion
-        echo "::set-env name=Version::fileVersionInfo"
-
-    - name: Publish release
-      uses: Xotl/cool-github-releases@v1.1.8
-      with:
-        mode: update
-        tag_name: v${{ env.Version }}
-        release_name: Daybreak v${{ env.Version }}
-        assets: .\build\Release\uMod.dll
-        github_token: ${{ env.GITHUB_TOKEN }}
-        replace_assets: true
-        body_mrkdwn: ${{ env.Changelog }}
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     
