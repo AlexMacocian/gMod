@@ -74,7 +74,7 @@ jobs:
         DXSDK_DIR: ${{ env.DXSDK_DIR }}
 
     - name: Build binaries
-      run: cmake --build build --config Release -DDIRECTX_SDK_INCLUDE_DIR="${{ env.DXSDK_DIR }}Include" -DDIRECTX_SDK_LIB_DIR="${{ env.DXSDK_DIR }}Lib/x86"
+      run: cmake --build build --config Release
       env:
         DXSDK_DIR: ${{ env.DXSDK_DIR }}
     
