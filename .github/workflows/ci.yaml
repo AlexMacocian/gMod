@@ -56,7 +56,7 @@ jobs:
 
     - name: List dxsdk files
       run: |
-        cd $HOME/cache
+        cd DXSDK
         ls
         cd Include
         ls
