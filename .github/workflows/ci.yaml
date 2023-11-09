@@ -102,11 +102,9 @@ jobs:
         }
       shell: pwsh
 
-    - name: Retrieve version
+    - name: Display version
       run: |
-        echo $GITHUB_ENV
+        Get-Content $env:GITHUB_ENV
         echo ${{ env.Version }}
       shell: pwsh
-      env:
-        Version: ${{ env.Version }}
     
