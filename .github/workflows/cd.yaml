@@ -90,6 +90,7 @@ jobs:
         DXSDK_DIR: ${{ env.DXSDK_DIR }}
     
     - name: Retrieve version
+      id: set_version
       run: |
         $fileVersionInfo = (Get-Item -Path .\build\Release\uMod.dll).VersionInfo.FileVersion
         if ([string]::IsNullOrEmpty($fileVersionInfo)) {
@@ -97,7 +98,7 @@ jobs:
             exit 1
         } else {
             Write-Host "FileVersionInfo: $fileVersionInfo"
-            echo "Version=$fileVersionInfo" >> $GITHUB_ENV
+            echo "::set-output name=version::$fileVersionInfo"
         }
       shell: pwsh
 
@@ -105,8 +106,8 @@ jobs:
       uses: Xotl/cool-github-releases@v1.1.8
       with:
         mode: update
-        tag_name: v${{ env.Version }}
-        release_name: uMod v${{ env.Version }}
+        tag_name: v${{ steps.set_version.outputs.version }}"
+        release_name: uMod v${{ steps.set_version.outputs.version }}"
         assets: .\build\Release\uMod.dll
         github_token: ${{ env.GITHUB_TOKEN }}
         replace_assets: true
