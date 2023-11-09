@@ -69,11 +69,17 @@ jobs:
         DXSDK_DIR: ${{ env.DXSDK_DIR }}
       shell: pwsh
 
+    - name: Copy DirectX libraries to project lib directory
+      run: Copy-Item -Path "${{ env.DXSDK_DIR }}/Lib/x86/*" -Destination Lib/ -Recurse -Force
+      env:
+        DXSDK_DIR: ${{ env.DXSDK_DIR }}
+      shell: pwsh
+
     - name: Setup MSBuild.exe
       uses: microsoft/setup-msbuild@v1.3.1
 
     - name: Build CMake Files
-      run: cmake -S . -B build -A Win32 -DDIRECTX_SDK_INCLUDE_DIR="${{ env.DXSDK_DIR }}/Include" -DDIRECTX_SDK_LIB_DIR="${{ env.DXSDK_DIR }}/Lib/x86"
+      run: cmake -S . -B build -A Win32
       env:
         DXSDK_DIR: ${{ env.DXSDK_DIR }}
 
