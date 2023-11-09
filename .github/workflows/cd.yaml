@@ -106,8 +106,8 @@ jobs:
       uses: Xotl/cool-github-releases@v1.1.8
       with:
         mode: update
-        tag_name: v${{ steps.set_version.outputs.version }}"
-        release_name: uMod v${{ steps.set_version.outputs.version }}"
+        tag_name: v${{ steps.set_version.outputs.version }}
+        release_name: uMod v${{ steps.set_version.outputs.version }}
         assets: .\build\Release\uMod.dll
         github_token: ${{ env.GITHUB_TOKEN }}
         replace_assets: true
