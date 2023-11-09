@@ -63,7 +63,7 @@ jobs:
         ls
         cd Include
         ls
-        cd Lib
+        cd ../Lib/x86
         ls
 
     - name: Setup MSBuild.exe
