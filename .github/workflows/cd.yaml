@@ -6,6 +6,10 @@ on:
   push:
     branches:
       - main
+  # Delete pull_request condition on merge
+  pull_request:
+    branches:
+      - main
   workflow_dispatch:
       
 jobs:
@@ -49,6 +53,18 @@ jobs:
         mv _DX2010_/DXSDK $HOME/cache
         rm -fR _DX*_ _DX*_.exe
       shell: bash
+
+    - name: Echo cache
+      run: echo {{ env.DXSDK_DIR }}
+
+    - name: List dxsdk files
+      run: |
+        cd $HOME/cache
+        ls
+        cd Include
+        ls
+        cd Lib/x86
+        ls
 
     - name: Setup MSBuild.exe
       uses: microsoft/setup-msbuild@v1.3.1
