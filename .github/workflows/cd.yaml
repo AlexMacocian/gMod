@@ -55,7 +55,7 @@ jobs:
       shell: bash
 
     - name: Echo cache
-      run: echo {{ env.DXSDK_DIR }}
+      run: echo ${{ env.DXSDK_DIR }}
 
     - name: List dxsdk files
       run: |
@@ -63,7 +63,7 @@ jobs:
         ls
         cd Include
         ls
-        cd Lib/x86
+        cd Lib
         ls
 
     - name: Setup MSBuild.exe
