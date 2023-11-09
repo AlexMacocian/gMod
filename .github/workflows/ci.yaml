@@ -1,9 +1,12 @@
 # This continuous integration pipeline is triggered anytime a user pushes code to the repo.
 # This pipeline builds the Wpf project, runs unit tests, then saves the MSIX build artifact.
-name:  uMod CD Pipeline
+name:  uMod CI Pipeline
 
 on:
   push:
+    branches:
+      - main
+  pull_request:
     branches:
       - main
   workflow_dispatch:
@@ -30,50 +33,63 @@ jobs:
 
     #https://stackoverflow.com/questions/61037714/how-to-install-an-old-version-of-the-direct-x-api-in-github-actions
     - name:  Config
-      run:   echo ::set-env name=DXSDK_DIR::$HOME/cache/
+      run:   echo "DXSDK_DIR=DXSDK" >> $GITHUB_ENV
       shell: bash
 
     - name: Cache
       id:   cache
       uses: actions/cache@v1
       with:
-        path: ~/cache
-        key:  cache
+        path: DXSDK
+        key:  DXSDK
 
     - name:  Cache create
       if:    steps.cache.outputs.cache-hit != 'true'
       run:   |
         curl -L https://download.microsoft.com/download/a/e/7/ae743f1f-632b-4809-87a9-aa1bb3458e31/DXSDK_Jun10.exe -o _DX2010_.exe
-        7z x _DX2010_.exe DXSDK/Include -o_DX2010_
-        7z x _DX2010_.exe DXSDK/Lib/x86 -o_DX2010_
-        mv _DX2010_/DXSDK $HOME/cache
-        rm -fR _DX*_ _DX*_.exe
+        7z x _DX2010_.exe DXSDK/Include
+        7z x _DX2010_.exe DXSDK/Lib/x86
       shell: bash
+
+    - name: Echo cache
+      run: echo ${{ env.DXSDK_DIR }}
+
+    - name: List dxsdk files
+      run: |
+        cd DXSDK
+        ls
+        cd Include
+        ls
+        cd ../Lib/x86
+        ls
+
+    - name: Copy DirectX headers to project include directory
+      run: Copy-Item -Path "${{ env.DXSDK_DIR }}/Include/*" -Destination header/ -Recurse -Force
+      env:
+        DXSDK_DIR: ${{ env.DXSDK_DIR }}
+      shell: pwsh
+
+    - name: Ensure Lib directory exists and copy DirectX libraries
+      run: |
+        $libDir = "Lib/"
+        if (-Not (Test-Path -Path $libDir)) {
+            New-Item -ItemType Directory -Path $libDir
+        }
+        Copy-Item -Path "${{ env.DXSDK_DIR }}/Lib/x86/*" -Destination $libDir -Recurse -Force
+      env:
+        DXSDK_DIR: ${{ env.DXSDK_DIR }}
+      shell: pwsh
 
     - name: Setup MSBuild.exe
       uses: microsoft/setup-msbuild@v1.3.1
 
     - name: Build CMake Files
       run: cmake -S . -B build -A Win32
+      env:
+        DXSDK_DIR: ${{ env.DXSDK_DIR }}
 
     - name: Build binaries
       run: cmake --build build --config Release
-
-    - name: Retrieve version
-      run: |
-        $fileVersionInfo = (Get-ItemProperty -Path .\build\Release\uMod.dll).VersionInfo.FileVersion
-        echo "::set-env name=Version::fileVersionInfo"
-
-    - name: Publish release
-      uses: Xotl/cool-github-releases@v1.1.8
-      with:
-        mode: update
-        tag_name: v${{ env.Version }}
-        release_name: Daybreak v${{ env.Version }}
-        assets: .\build\Release\uMod.dll
-        github_token: ${{ env.GITHUB_TOKEN }}
-        replace_assets: true
-        body_mrkdwn: ${{ env.Changelog }}
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        DXSDK_DIR: ${{ env.DXSDK_DIR }}
     

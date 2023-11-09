@@ -33,7 +33,25 @@ file(GLOB SOURCES
     "source/*.cpp"
     "header/*.h*"
     ${VERSION_RC})
-target_link_libraries(uMod PRIVATE ${DIRECTX_SDK_LIB_DIR}/d3d9.lib ${DIRECTX_SDK_LIB_DIR}/d3dx9.lib ${DIRECTX_SDK_LIB_DIR}/dxguid.lib)
+
+find_library(D3D9_LIB NAMES d3d9 PATHS ${DIRECTX_SDK_LIB_DIR} NO_DEFAULT_PATH)
+find_library(D3DX9_LIB NAMES d3dx9 PATHS ${DIRECTX_SDK_LIB_DIR} NO_DEFAULT_PATH)
+find_library(DXGUID_LIB NAMES dxguid PATHS ${DIRECTX_SDK_LIB_DIR} NO_DEFAULT_PATH)
+
+if(NOT D3D9_LIB)
+  find_library(D3D9_LIB NAMES d3d9 PATHS ${CMAKE_SOURCE_DIR}/Lib)
+endif()
+
+if(NOT D3DX9_LIB)
+  find_library(D3DX9_LIB NAMES d3dx9 PATHS ${CMAKE_SOURCE_DIR}/Lib)
+endif()
+
+if(NOT DXGUID_LIB)
+  find_library(DXGUID_LIB NAMES dxguid PATHS ${CMAKE_SOURCE_DIR}/Lib)
+endif()
+
+target_link_libraries(uMod PRIVATE ${D3D9_LIB} ${D3DX9_LIB} ${DXGUID_LIB})
+
 source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}" FILES ${SOURCES})
 target_sources(uMod PRIVATE ${SOURCES})
 target_compile_features(uMod PUBLIC cxx_std_17)
