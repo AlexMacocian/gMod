@@ -90,3 +90,15 @@ jobs:
       env:
         DXSDK_DIR: ${{ env.DXSDK_DIR }}
     
+    - name: Retrieve version
+      run: |
+        $fileVersionInfo = (Get-Item -Path .\build\Release\uMod.dll).VersionInfo.FileVersion
+        if (-z $fileVersionInfo) {
+            Write-Host "The DLL file version information could not be retrieved."
+            exit 1
+        } else {
+            Write-Host "FileVersionInfo: $fileVersionInfo"
+            echo "Version=$fileVersionInfo" >> $GITHUB_ENV
+        }
+      shell: pwsh
+    
