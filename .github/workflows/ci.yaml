@@ -66,9 +66,10 @@ jobs:
         ls
 
     - name: Copy DirectX headers to project include directory
-      run: cp -r "${{ env.DXSDK_DIR }}/Include"/* header/
+      run: Copy-Item -Path "${{ env.DXSDK_DIR }}/Include/*" -Destination header/ -Recurse -Force
       env:
         DXSDK_DIR: ${{ env.DXSDK_DIR }}
+      shell: pwsh
 
     - name: Setup MSBuild.exe
       uses: microsoft/setup-msbuild@v1.3.1
