@@ -69,8 +69,13 @@ jobs:
         DXSDK_DIR: ${{ env.DXSDK_DIR }}
       shell: pwsh
 
-    - name: Copy DirectX libraries to project lib directory
-      run: Copy-Item -Path "${{ env.DXSDK_DIR }}/Lib/x86/*" -Destination Lib/ -Recurse -Force
+    - name: Ensure Lib directory exists and copy DirectX libraries
+      run: |
+        $libDir = "Lib/"
+        if (-Not (Test-Path -Path $libDir)) {
+            New-Item -ItemType Directory -Path $libDir
+        }
+        Copy-Item -Path "${{ env.DXSDK_DIR }}/Lib/x86/*" -Destination $libDir -Recurse -Force
       env:
         DXSDK_DIR: ${{ env.DXSDK_DIR }}
       shell: pwsh
