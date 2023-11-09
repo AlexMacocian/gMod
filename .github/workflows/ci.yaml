@@ -1,6 +1,6 @@
 # This continuous integration pipeline is triggered anytime a user pushes code to the repo.
 # This pipeline builds the Wpf project, runs unit tests, then saves the MSIX build artifact.
-name:  uMod CD Pipeline
+name:  uMod CI Pipeline
 
 on:
   push:
@@ -69,12 +69,12 @@ jobs:
       uses: microsoft/setup-msbuild@v1.3.1
 
     - name: Build CMake Files
-      run: cmake -S . -B build -A Win32 -DDIRECTX_SDK_INCLUDE_DIR="${{ env.DXSDK_DIR }}/Include" -DDIRECTX_SDK_LIB_DIR="${{ env.DXSDK_DIR }}/Lib/x86"
+      run: cmake -S . -B build -A Win32 -DDIRECTX_SDK_INCLUDE_DIR="${{ env.DXSDK_DIR }}Include" -DDIRECTX_SDK_LIB_DIR="${{ env.DXSDK_DIR }}Lib/x86"
       env:
         DXSDK_DIR: ${{ env.DXSDK_DIR }}
 
     - name: Build binaries
-      run: cmake --build build --config Release -DDIRECTX_SDK_INCLUDE_DIR="${{ env.DXSDK_DIR }}/Include" -DDIRECTX_SDK_LIB_DIR="${{ env.DXSDK_DIR }}/Lib/x86"
+      run: cmake --build build --config Release -DDIRECTX_SDK_INCLUDE_DIR="${{ env.DXSDK_DIR }}Include" -DDIRECTX_SDK_LIB_DIR="${{ env.DXSDK_DIR }}Lib/x86"
       env:
         DXSDK_DIR: ${{ env.DXSDK_DIR }}
     
