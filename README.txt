@@ -1,4 +1,4 @@
-# Moved development at https://github.com/DubbleClick/gMod
+Moved development at https://github.com/DubbleClick/gMod
 
 Requirements:
 - The DirectX SDK (I use June 2010)
