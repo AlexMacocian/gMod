@@ -2,7 +2,7 @@
 # project specific logic here.
 #
 
-project(uMod)
+project(uMod_Basic)
 
 if(CMAKE_SIZEOF_VOID_P EQUAL 8)
     message(FATAL_ERROR "You are configuring a 64bit build, this is not supported. Run cmake with `-A Win32`")
@@ -67,3 +67,31 @@ target_compile_definitions(uMod PRIVATE
 
 target_precompile_headers(uMod PRIVATE "header/pch.h")
 target_include_directories(uMod PUBLIC "header")
+
+# New project with an additional flag
+project(uMod_Listener)
+
+# Reuse the existing source files
+add_library(uMod_Listener SHARED ${SOURCES})
+
+# Reuse the existing linked libraries
+target_link_libraries(uMod_Listener PRIVATE ${D3D9_LIB} ${D3DX9_LIB} ${DXGUID_LIB})
+
+# Set compile options for the new project
+target_compile_features(uMod_Listener PUBLIC cxx_std_17)
+target_compile_definitions(uMod_Listener PRIVATE
+    $<$<CONFIG:Debug>:BUILD_TYPE_DEBUG>
+    $<$<CONFIG:Release>:BUILD_TYPE_RELEASE>
+    INJECTION_METHOD=2
+    DIRECT_INJECTION
+    DEF_USE_DX9=true
+    DX_XX_File=9
+    LOG_MESSAGE
+    USE_LISTENER
+)
+
+# Reuse precompiled header
+target_precompile_headers(uMod_Listener PRIVATE "header/pch.h")
+
+# Include directories
+target_include_directories(uMod_Listener PUBLIC "header")
